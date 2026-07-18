@@ -5,99 +5,7 @@ import { Link } from "react-router-dom";
 import SectionBadge from "./SectionBadge";
 import BookCard from "./BookCard";
 
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  category: string;
-  price: string;
-  rating: number;
-  image: string;
-  isNew: boolean;
-}
-
-const mockPopularBooks: Book[] = [
-  {
-    id: "8",
-    title: "Lược Sử Loài Người",
-    author: "Yuval Noah Harari",
-    category: "LỊCH SỬ",
-    price: "350.000đ",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1460518451285-cd3ab43ec357?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  },
-  {
-    id: "12",
-    title: "Đắc Nhân Tâm",
-    author: "Dale Carnegie",
-    category: "TÂM LÝ",
-    price: "110.000đ",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  },
-  {
-    id: "14",
-    title: "Nhà Giả Kim",
-    author: "Paulo Coelho",
-    category: "TIỂU THUYẾT",
-    price: "99.000đ",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  },
-  {
-    id: "16",
-    title: "Cha Giàu Cha Nghèo",
-    author: "Robert Kiyosaki",
-    category: "KINH DOANH",
-    price: "150.000đ",
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  },
-  {
-    id: "9",
-    title: "Tâm Lý Học Đám Đông",
-    author: "Gustave Le Bon",
-    category: "TÂM LÝ",
-    price: "125.000đ",
-    rating: 4.5,
-    image: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  },
-  {
-    id: "10",
-    title: "Vật Lý Lý Thuyết Hiện Đại",
-    author: "Stephen Hawking",
-    category: "KHOA HỌC",
-    price: "390.000đ",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=200",
-    isNew: true
-  },
-  {
-    id: "13",
-    title: "Khởi Nghiệp Tinh Gọn",
-    author: "Eric Ries",
-    category: "KINH DOANH",
-    price: "189.000đ",
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  },
-  {
-    id: "15",
-    title: "Trí Tuệ Do Thái",
-    author: "Eran Katz",
-    category: "TÂM LÝ",
-    price: "135.000đ",
-    rating: 4.6,
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=200",
-    isNew: false
-  }
-];
+import { mockBooks } from "../../constants/booksData";
 
 const categoriesFilterList = [
   { id: "all", label: "Tất cả" },
@@ -118,12 +26,25 @@ export default function PopularBooks() {
   };
 
   const getFilteredBooks = () => {
-    if (activeTab === "all") return mockPopularBooks;
-    return mockPopularBooks.filter((book) => {
-      if (activeTab === "KHOA HỌC") {
-        return book.category === "KHOA HỌC" || book.category === "CÔNG NGHỆ";
+    const popularBookIds = ["8", "12", "14", "16", "9", "10", "13", "15"];
+    const popularBooksList = mockBooks.filter((book) => popularBookIds.includes(book.id));
+
+    if (activeTab === "all") return popularBooksList;
+    return popularBooksList.filter((book) => {
+      const cat = book.category.toUpperCase();
+      if (activeTab === "TÂM LÝ") {
+        return cat.includes("TÂM LÝ") || cat.includes("PHÁT TRIỂN BẢN THÂN");
       }
-      return book.category === activeTab;
+      if (activeTab === "KINH DOANH") {
+        return cat.includes("KINH DOANH") || cat.includes("KHỞI NGHIỆP");
+      }
+      if (activeTab === "KHOA HỌC") {
+        return cat.includes("KHOA HỌC") || cat.includes("CÔNG NGHỆ");
+      }
+      if (activeTab === "LỊCH SỬ") {
+        return cat.includes("LỊCH SỬ");
+      }
+      return cat === activeTab;
     });
   };
 
