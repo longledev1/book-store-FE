@@ -23,7 +23,7 @@ const featuresList: FeatureItem[] = [
   },
   {
     icon: ThumbsUp,
-    title: "Tủ sách cá nhân hóa",
+    title: "Trợ lý tư vấn",
     desc: "Gợi ý chính xác theo sở thích, hành vi đọc và hồ sơ tích hợp của bạn.",
   },
   {
@@ -77,7 +77,7 @@ export default function AIFeatures() {
                 return (
                   <div
                     key={index}
-                    className="group ai-feature-card flex gap-4 rounded-2xl border border-slate-900 bg-slate-950/20 p-4 transition-all duration-300 hover:border-slate-800 hover:bg-slate-900/10 cursor-pointer"
+                    className="group ai-feature-card flex cursor-pointer gap-4 rounded-2xl border border-slate-900 bg-slate-950/20 p-4 transition-all duration-300 hover:border-slate-800 hover:bg-slate-900/10"
                   >
                     {/* Icon container */}
                     <div className="text-primary group-hover:bg-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-900/30 bg-blue-950/40 transition-colors duration-300 group-hover:text-white">
@@ -100,7 +100,7 @@ export default function AIFeatures() {
 
           {/* Right Column: Interactive Canvas Visualizer */}
           <div className="relative lg:col-span-5">
-            <div className="group relative mx-auto aspect-[4/3] w-full max-w-lg overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-950/30 shadow-2xl backdrop-blur-md cursor-pointer">
+            <div className="group relative mx-auto aspect-[4/3] w-full max-w-lg cursor-pointer overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-950/30 shadow-2xl backdrop-blur-md">
               {/* The interactive constellation canvas */}
               <BookConstellationCanvas />
 

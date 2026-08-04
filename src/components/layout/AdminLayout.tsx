@@ -1,36 +1,42 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  BookMarked, 
-  ShoppingBag, 
-  Users, 
-  PenTool, 
-  ArrowLeft, 
-  BookOpen
-} from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronDown } from "lucide-react";
+
+import { adminMenuConfig } from "../../config/adminNavigation";
 
 export default function AdminLayout() {
   const location = useLocation();
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  React.useEffect(() => {
+  // Scroll to top on pathname changes
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const menuItems = [
-    { path: "/admin", name: "Tổng quan", icon: LayoutDashboard },
-    { path: "/admin/books", name: "Quản lý Sách", icon: BookMarked },
-    { path: "/admin/orders", name: "Quản lý Đơn hàng", icon: ShoppingBag },
-    { path: "/admin/users", name: "Quản lý Người dùng", icon: Users },
-    { path: "/admin/blogs", name: "Quản lý Blog & SEO", icon: PenTool }
-  ];
+  // Auto-expand the dropdown menu if one of its sub-items is currently active
+  useEffect(() => {
+    adminMenuConfig.forEach(item => {
+      if (item.subItems) {
+        const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path);
+        if (hasActiveSub) {
+          setExpandedMenus(prev => ({ ...prev, [item.name]: true }));
+        }
+      }
+    });
+  }, [location.pathname]);
+
+  const toggleMenu = (name: string) => {
+    setExpandedMenus(prev => ({ ...prev, [name]: !prev[name] }));
+  };
 
   return (
     <div className="min-h-screen flex bg-slate-50 text-neutral-dark font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-border-light bg-white flex flex-col justify-between shrink-0">
-        <div className="p-6 space-y-8">
-          {/* Logo */}
+      
+      {/* Sidebar navigation */}
+      <aside className="w-64 border-r border-border-light bg-white flex flex-col justify-between shrink-0 select-none">
+        <div className="p-6 space-y-7">
+          
+          {/* Logo brand */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white">
               <BookOpen className="w-4.5 h-4.5" />
@@ -39,23 +45,88 @@ export default function AdminLayout() {
           </div>
 
           {/* Navigation Menu */}
-          <nav className="space-y-1">
-            {menuItems.map((item) => {
+          <nav className="space-y-1.5">
+            {adminMenuConfig.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              
+              // Case 1: Simple link (no sub-items)
+              if (!item.subItems) {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.path || "/admin"}
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold transition-colors ${
+                      isActive
+                        ? "bg-primary text-white shadow-sm shadow-blue-500/10"
+                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                    }`}
+                  >
+                    <Icon className="w-4.5 h-4.5 shrink-0" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              }
+
+              // Case 2: Dropdown link group (has sub-items)
+              const isExpanded = !!expandedMenus[item.name];
+              const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path);
+
               return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                    isActive
-                      ? "bg-primary text-white"
-                      : "text-muted-text hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                >
-                  <Icon className="w-4.5 h-4.5" />
-                  <span>{item.name}</span>
-                </Link>
+                <div key={item.name} className="flex flex-col">
+                  {/* Dropdown parent trigger */}
+                  <button
+                    onClick={() => toggleMenu(item.name)}
+                    className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      hasActiveSub 
+                        ? "text-primary bg-blue-50/20" 
+                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4.5 h-4.5 shrink-0" />
+                      <span>{item.name}</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${
+                        isExpanded ? "rotate-180 text-primary" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {/* Dropdown child items list */}
+                  <div
+                    className={`transition-all duration-300 overflow-hidden ${
+                      isExpanded 
+                        ? "max-h-40 opacity-100 mt-1 pl-2" 
+                        : "max-h-0 opacity-0 pointer-events-none"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-1 border-l border-slate-100 ml-5 pl-2.5 pt-0.5">
+                      {item.subItems.map((sub) => {
+                        const isSubActive = location.pathname === sub.path;
+                        return (
+                          <Link
+                            key={sub.path}
+                            to={sub.path}
+                            className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                              isSubActive
+                                ? "text-primary bg-blue-50/50"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                            }`}
+                          >
+                            {/* Dot bullet indicator */}
+                            <div className={`w-1.5 h-1.5 rounded-full ${
+                              isSubActive ? "bg-primary scale-110" : "bg-slate-300"
+                            }`} />
+                            <span>{sub.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
               );
             })}
           </nav>

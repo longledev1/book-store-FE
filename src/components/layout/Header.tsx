@@ -20,24 +20,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Button } from "@base-ui/react/button";
+import { Button } from "../ui/button";
 import AISearchModal from "../client/AISearchModal";
 import AuthModal from "../client/auth/AuthModal";
 import { AnimatePresence } from "framer-motion";
 import { useUIStore } from "../../store/useUIStore";
 
-import { parentCategories, subcategoriesData } from "../../constants/categoriesData";
+import {
+  parentCategories,
+  categoriesData,
+} from "../../constants/categoriesData";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function Header() {
+  const user = useAuthStore((state) => state.user) as any;
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("science_tech");
+  const [activeCategory, setActiveCategory] = useState("technology");
   const { isAISearchOpen, setIsAISearchOpen } = useUIStore();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalView, setAuthModalView] = useState<"login" | "register">("login");
+  const [authModalView, setAuthModalView] = useState<"login" | "register">(
+    "login",
+  );
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -50,14 +59,9 @@ export default function Header() {
     }, 150);
   };
 
-  // Separate subcategories into grid groups and highlight tags
-  const activeCatData = subcategoriesData[activeCategory] || {
-    title: parentCategories.find((c) => c.id === activeCategory)?.name || "",
-    groups: [],
-  };
-
-  const gridGroups = activeCatData.groups.filter((g) => !g.isHighlighted);
-  const highlightGroups = activeCatData.groups.filter((g) => g.isHighlighted);
+  // Find active parent category data
+  const activeCatData = categoriesData.find((c) => c.id === activeCategory);
+  const subcategories = activeCatData ? activeCatData.categories : [];
 
   return (
     <>
@@ -185,49 +189,98 @@ export default function Header() {
             {/* Vertical Divider */}
             <div className="mx-1 hidden h-5 w-px bg-slate-200 sm:block" />
             {/* User Account / Profile Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="hover:text-primary flex items-center gap-1.5 rounded-full px-3 py-1.5 text-slate-500"
+            {!isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      className="hover:text-primary flex items-center gap-1.5 rounded-full px-3 py-1.5 text-slate-500"
+                    />
+                  }
                 >
                   <User className="h-4 w-4" />
                   <span className="">Tài khoản</span>
                   <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
+                </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setAuthModalView("register");
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 p-2 cursor-pointer"
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span>Đăng ký</span>
-                </DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setAuthModalView("register");
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="flex cursor-pointer items-center gap-2 p-2"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span>Đăng ký</span>
+                  </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={() => {
-                    setAuthModalView("login");
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 p-2 cursor-pointer"
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setAuthModalView("login");
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="flex cursor-pointer items-center gap-2 p-2"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    <span>Đăng nhập</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      className="hover:text-primary flex cursor-pointer items-center gap-2 rounded-full px-2.5 py-1.5 text-slate-500 transition-all"
+                    />
+                  }
                 >
-                  <LogIn className="h-4 w-4" />
-                  <span>Đăng nhập</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {user?.detail?.avatarUrl ? (
+                    <img
+                      src={user.detail.avatarUrl}
+                      alt={user.detail.fullName || "User Avatar"}
+                      className="h-6 w-6 rounded-full border border-slate-100 object-cover shadow-xs"
+                    />
+                  ) : (
+                    <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-black select-none">
+                      {(user?.detail?.fullName || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="max-w-[100px] truncate text-xs font-bold text-slate-700">
+                    Hi, {user?.detail?.fullName || "User"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    className="flex cursor-pointer items-center gap-2 p-2"
+                    render={<Link to="/profile" />}
+                  >
+                    <User className="h-4 w-4 text-slate-400" />
+                    <span>Thông tin tài khoản</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => logout()}
+                    className="flex cursor-pointer items-center gap-2 p-2 text-rose-500 focus:bg-rose-50/50"
+                  >
+                    <LogIn className="h-4 w-4 rotate-180" />
+                    <span>Đăng xuất</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
         {/* 3. Mega Menu (Toggled on Hovering over "Danh mục") */}
         {megaMenuOpen && (
           <div
-            className="animate-in fade-in slide-in-from-top-1 absolute top-16 right-0 left-0 z-45 flex h-[340px] w-full border-b border-slate-200 bg-white shadow-2xl duration-150"
+            className="animate-in fade-in slide-in-from-top-1 absolute top-16 right-0 left-0 z-45 flex h-[420px] w-full border-b border-slate-200 bg-white shadow-2xl duration-150"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -268,34 +321,40 @@ export default function Header() {
                     <BookMarked className="h-4 w-4" />
                   </div>
                   <h3 className="text-base font-bold tracking-tight text-slate-800">
-                    {activeCatData.title}
+                    {activeCatData?.name}
                   </h3>
                 </div>
 
-                {gridGroups.length > 0 ? (
+                {subcategories.length > 0 ? (
                   <div className="flex-grow">
                     {/* Grid Columns */}
-                    <div className="grid grid-cols-1 gap-x-16 gap-y-6 md:grid-cols-2">
-                      {gridGroups.map((group) => (
-                        <div key={group.title} className="space-y-3">
+                    <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+                      {subcategories.map((subcat) => (
+                        <div key={subcat.id} className="space-y-3">
                           <h5 className="border-b border-slate-100 pb-1.5 text-xs font-bold tracking-wider text-slate-800 uppercase">
-                            {group.title}
+                            {subcat.name}
                           </h5>
                           <ul className="space-y-2.5">
-                            {group.items.map((item) => (
-                              <li key={item}>
+                            {subcat.books.map((book) => (
+                              <li key={book.id}>
                                 <Link
-                                  to={`/books?category=${encodeURIComponent(item)}`}
-                                  className="hover:text-primary text-sm font-medium text-slate-500 transition-colors hover:underline"
+                                  to={`/books/${book.id}`}
+                                  className="hover:text-primary block max-w-[200px] truncate text-xs font-medium text-slate-500 transition-colors hover:underline"
+                                  title={`${book.title} - ${book.author}`}
                                   onClick={() => setMegaMenuOpen(false)}
                                 >
-                                  {item}
+                                  <span className="block truncate font-semibold text-slate-700">
+                                    {book.title}
+                                  </span>
+                                  <span className="mt-0.5 block truncate text-[10px] font-normal text-slate-400">
+                                    {book.author}
+                                  </span>
                                 </Link>
                               </li>
                             ))}
                           </ul>
                           <Link
-                            to="/books"
+                            to={`/books?category=${subcat.id}`}
                             className="text-primary inline-block pt-1 text-xs font-bold transition-colors hover:text-blue-700 hover:underline"
                             onClick={() => setMegaMenuOpen(false)}
                           >
@@ -304,22 +363,6 @@ export default function Header() {
                         </div>
                       ))}
                     </div>
-
-                    {/* Bottom Red highlighted tags */}
-                    {highlightGroups.length > 0 && (
-                      <div className="mt-8 flex shrink-0 flex-wrap gap-x-6 gap-y-2 border-t border-slate-100 pt-4">
-                        {highlightGroups.map((group) => (
-                          <Link
-                            key={group.title}
-                            to="/books"
-                            className="hover:text-primary flex items-center gap-1 text-xs font-bold text-slate-800 transition-colors"
-                            onClick={() => setMegaMenuOpen(false)}
-                          >
-                            <span>{group.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ) : (
                   /* Placeholder when no subcategories are defined */

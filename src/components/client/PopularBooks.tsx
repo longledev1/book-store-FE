@@ -31,20 +31,19 @@ export default function PopularBooks() {
 
     if (activeTab === "all") return popularBooksList;
     return popularBooksList.filter((book) => {
-      const cat = book.category.toUpperCase();
       if (activeTab === "TÂM LÝ") {
-        return cat.includes("TÂM LÝ") || cat.includes("PHÁT TRIỂN BẢN THÂN");
+        return book.parentCategoryId === "psychology";
       }
       if (activeTab === "KINH DOANH") {
-        return cat.includes("KINH DOANH") || cat.includes("KHỞI NGHIỆP");
+        return book.parentCategoryId === "business";
       }
       if (activeTab === "KHOA HỌC") {
-        return cat.includes("KHOA HỌC") || cat.includes("CÔNG NGHỆ");
+        return book.parentCategoryId === "science" || book.parentCategoryId === "technology";
       }
       if (activeTab === "LỊCH SỬ") {
-        return cat.includes("LỊCH SỬ");
+        return book.parentCategoryId === "history";
       }
-      return cat === activeTab;
+      return book.parentCategoryId === activeTab;
     });
   };
 

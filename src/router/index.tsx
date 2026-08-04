@@ -9,20 +9,23 @@ import ProtectedRoute from "./ProtectedRoute";
 
 // Client Pages
 import HomePage from "../pages/client/HomePage";
+import BooksPage from "../pages/client/BooksPage";
 import BookDetailPage from "../pages/client/BookDetailPage";
 import CartPage from "../pages/client/CartPage";
 import CheckoutPage from "../pages/client/CheckoutPage";
 import BlogPage from "../pages/client/BlogPage";
 import BlogDetailPage from "../pages/client/BlogDetailPage";
 import ProfilePage from "../pages/client/ProfilePage";
+import AuthorDetailPage from "../pages/client/AuthorDetailPage";
 
 // Auth Pages
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 
 // Admin Pages
 import DashboardPage from "../pages/admin/DashboardPage";
-import BookManagementPage from "../pages/admin/BookManagementPage";
+import BookManagementPage from "../pages/admin/books/BookManagementPage";
 import OrderManagementPage from "../pages/admin/OrderManagementPage";
 import UserManagementPage from "../pages/admin/UserManagementPage";
 import BlogManagementPage from "../pages/admin/BlogManagementPage";
@@ -39,7 +42,7 @@ const router = createBrowserRouter([
       },
       {
         path: "books",
-        element: <BookDetailPage />
+        element: <BooksPage />
       },
       {
         path: "books/:id",
@@ -60,6 +63,10 @@ const router = createBrowserRouter([
       {
         path: "blog/:id",
         element: <BlogDetailPage />
+      },
+      {
+        path: "author/:name",
+        element: <AuthorDetailPage />
       },
       // Protected Client Profile route
       {
@@ -86,6 +93,10 @@ const router = createBrowserRouter([
       {
         path: "register",
         element: <RegisterPage />
+      },
+      {
+        path: "reset-password/:token",
+        element: <ResetPasswordPage />
       }
     ]
   },

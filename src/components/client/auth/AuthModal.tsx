@@ -77,7 +77,6 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
             {view === "register" && (
               <RegisterForm 
                 onSwitchToLogin={() => setView("login")}
-                onSuccess={() => onClose()}
               />
             )}
 
