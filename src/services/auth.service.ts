@@ -22,6 +22,14 @@ export interface ResetPasswordCredentials {
   newPassword: string;
 }
 
+export interface RefreshResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    accessToken: string;
+  };
+}
+
 // LOGIN API [POST] -- /auth/login
 
 export const loginAPI = async (credentials: LoginCredentials) => {
@@ -69,6 +77,15 @@ export const resetPasswordAPI = async (
   const response = await axiosInstance.post(
     CLIENT_API_URL.AUTH_RESET_PASSWORD,
     credentials,
+  );
+  return response.data;
+};
+
+// REFRESH TOKEN API [POST] -- /auth/refresh
+
+export const refreshTokenAPI = async () => {
+  const response = await axiosInstance.post<RefreshResponse>(
+    CLIENT_API_URL.AUTH_REFRESH_TOKEN,
   );
   return response.data;
 };

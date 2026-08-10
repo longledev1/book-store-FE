@@ -15,7 +15,7 @@ import CartPage from "../pages/client/CartPage";
 import CheckoutPage from "../pages/client/CheckoutPage";
 import BlogPage from "../pages/client/BlogPage";
 import BlogDetailPage from "../pages/client/BlogDetailPage";
-import ProfilePage from "../pages/client/ProfilePage";
+import ProfilePage from "../pages/ProfilePage";
 import AuthorDetailPage from "../pages/client/AuthorDetailPage";
 
 // Auth Pages
@@ -67,16 +67,18 @@ const router = createBrowserRouter([
       {
         path: "author/:name",
         element: <AuthorDetailPage />
-      },
-      // Protected Client Profile route
+      }
+    ]
+  },
+
+  // Protected Profile Route Configuration (No Header and Footer)
+  {
+    path: "/profile",
+    element: <ProtectedRoute allowedRoles={["customer", "admin"]} />,
+    children: [
       {
-        element: <ProtectedRoute allowedRoles={["customer", "admin"]} />,
-        children: [
-          {
-            path: "profile",
-            element: <ProfilePage />
-          }
-        ]
+        index: true,
+        element: <ProfilePage />
       }
     ]
   },

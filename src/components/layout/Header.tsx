@@ -31,6 +31,7 @@ import {
   categoriesData,
 } from "../../constants/categoriesData";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { getProfileAPI } from "@/services/auth.service";
 
 export default function Header() {
   const user = useAuthStore((state) => state.user) as any;
@@ -158,6 +159,7 @@ export default function Header() {
                 className="focus:border-primary/50 focus:ring-primary/10 text-neutral-dark w-full rounded-full border border-slate-200/60 bg-slate-50 py-1.5 pr-4 pl-10 text-xs font-medium placeholder-slate-400 transition-all hover:bg-slate-100/50 focus:bg-white focus:ring-4 focus:outline-none"
               />
             </div>
+
             <button
               onClick={() => setIsAISearchOpen(true)}
               className="from-primary shadow-primary/20 hover:shadow-primary/30 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-gradient-to-r to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
