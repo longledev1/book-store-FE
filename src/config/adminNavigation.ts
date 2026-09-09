@@ -4,7 +4,8 @@ import {
   BookMarked, 
   ShoppingBag, 
   Users, 
-  PenTool 
+  PenTool,
+  Image
 } from "lucide-react";
 
 export interface SubmenuItem {
@@ -30,7 +31,7 @@ export const adminMenuConfig: NavItem[] = [
     name: "Quản lý Catalog", 
     icon: BookMarked,
     subItems: [
-      { name: "Danh sách sách", path: "/admin/books" },
+      { name: "Danh sách sản phẩm", path: "/admin/products" },
       { name: "Danh mục sách", path: "/admin/categories" },
       { name: "Danh sách tác giả", path: "/admin/authors" }
     ]
@@ -56,5 +57,10 @@ export const adminMenuConfig: NavItem[] = [
       { name: "Danh sách bài viết", path: "/admin/blogs" },
       { name: "Tạo bài viết mới", path: "/admin/blogs/new" }
     ]
+  },
+  {
+    name: "Quản lý Media",
+    path: "/admin/media",
+    icon: Image
   }
 ];

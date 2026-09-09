@@ -1,20 +1,23 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
 }
 
 export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-  // Temporary authentication check (will connect to Zustand useAuthStore later)
-  const isAuthenticated = true; 
-  const userRole = "admin"; // Mock user role: 'customer' or 'admin'
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const user = useAuthStore((state) => state.user);
+
+  const isAuthenticated = !!accessToken;
+  const userRole = user?.role;
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
+  if (allowedRoles && !allowedRoles.includes(userRole ?? "")) {
     return <Navigate to="/" replace />;
   }
 

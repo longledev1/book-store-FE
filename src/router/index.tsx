@@ -25,10 +25,13 @@ import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 
 // Admin Pages
 import DashboardPage from "../pages/admin/DashboardPage";
-import BookManagementPage from "../pages/admin/books/BookManagementPage";
+import ProductManagementPage from "../pages/admin/products/ProductManagementPage";
+import CategoryManagementPage from "../pages/admin/categories/CategoryManagementPage";
 import OrderManagementPage from "../pages/admin/OrderManagementPage";
 import UserManagementPage from "../pages/admin/UserManagementPage";
 import BlogManagementPage from "../pages/admin/BlogManagementPage";
+import AuthorManagementPage from "../pages/admin/authors/AuthorManagementPage";
+import MediaManagementPage from "../pages/admin/media/MediaManagementPage";
 
 const router = createBrowserRouter([
   // Client Route Configuration
@@ -38,49 +41,49 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />
+        element: <HomePage />,
       },
       {
         path: "books",
-        element: <BooksPage />
+        element: <BooksPage />,
       },
       {
         path: "books/:id",
-        element: <BookDetailPage />
+        element: <BookDetailPage />,
       },
       {
         path: "cart",
-        element: <CartPage />
+        element: <CartPage />,
       },
       {
         path: "checkout",
-        element: <CheckoutPage />
+        element: <CheckoutPage />,
       },
       {
         path: "blog",
-        element: <BlogPage />
+        element: <BlogPage />,
       },
       {
         path: "blog/:id",
-        element: <BlogDetailPage />
+        element: <BlogDetailPage />,
       },
       {
         path: "author/:name",
-        element: <AuthorDetailPage />
-      }
-    ]
+        element: <AuthorDetailPage />,
+      },
+    ],
   },
 
   // Protected Profile Route Configuration (No Header and Footer)
   {
     path: "/profile",
-    element: <ProtectedRoute allowedRoles={["customer", "admin"]} />,
+    element: <ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]} />,
     children: [
       {
         index: true,
-        element: <ProfilePage />
-      }
-    ]
+        element: <ProfilePage />,
+      },
+    ],
   },
 
   // Auth Route Configuration
@@ -90,57 +93,74 @@ const router = createBrowserRouter([
     children: [
       {
         path: "login",
-        element: <LoginPage />
+        element: <LoginPage />,
       },
       {
         path: "register",
-        element: <RegisterPage />
+        element: <RegisterPage />,
       },
       {
         path: "reset-password/:token",
-        element: <ResetPasswordPage />
-      }
-    ]
+        element: <ResetPasswordPage />,
+      },
+    ],
   },
 
   // Admin Route Configuration (Protected)
+  // Admin Route Configuration (Protected)
   {
     path: "/admin",
-    element: <ProtectedRoute allowedRoles={["admin"]} />,
+    element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
     children: [
       {
         element: <AdminLayout />,
         children: [
           {
             index: true,
-            element: <DashboardPage />
+            element: <DashboardPage />,
           },
           {
-            path: "books",
-            element: <BookManagementPage />
+            path: "products",
+            element: <ProductManagementPage />,
+          },
+          {
+            path: "categories",
+            element: <CategoryManagementPage />,
           },
           {
             path: "orders",
-            element: <OrderManagementPage />
+            element: <OrderManagementPage />,
           },
           {
             path: "users",
-            element: <UserManagementPage />
+            element: <UserManagementPage />,
           },
           {
             path: "blogs",
-            element: <BlogManagementPage />
-          }
-        ]
-      }
-    ]
+            element: <BlogManagementPage />,
+          },
+          {
+            path: "authors",
+            element: <AuthorManagementPage />,
+          },
+          {
+            path: "media",
+            element: <MediaManagementPage />,
+          },
+        ],
+      },
+    ],
   },
 
   // Fallback Redirect
   {
     path: "*",
-    element: <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">Trang không tồn tại</div>
-  }
+    element: (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 font-sans">
+        Trang không tồn tại
+      </div>
+    ),
+  },
 ]);
 
 export default router;

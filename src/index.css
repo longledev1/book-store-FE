@@ -131,6 +131,42 @@
   html {
     @apply font-sans;
   }
+
+  /* Make all interactive and hoverable elements show hand cursor */
+  a,
+  button,
+  select,
+  summary,
+  [role="button"],
+  [role="link"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  .cursor-pointer,
+  [class*="cursor-pointer"],
+  [class*="hover:"] {
+    cursor: pointer !important;
+  }
+
+  /* Text inputs must maintain text cursor */
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="url"],
+  input[type="tel"],
+  textarea,
+  [contenteditable="true"] {
+    cursor: text !important;
+  }
+
+  /* Disabled state override */
+  :disabled,
+  [disabled],
+  .disabled {
+    cursor: not-allowed !important;
+  }
 }
 
 /* Custom global scrollbar styling */
