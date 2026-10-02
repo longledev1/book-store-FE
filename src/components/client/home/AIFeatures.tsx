@@ -7,7 +7,7 @@ import {
   Sparkles,
   BookOpen,
 } from "lucide-react";
-import { BookConstellationCanvas } from "./BookConstellationCanvas";
+import { BookConstellationCanvas } from "../ai/BookConstellationCanvas";
 
 interface FeatureItem {
   icon: React.ComponentType<{ className?: string }>;

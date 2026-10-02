@@ -24,12 +24,22 @@ export const resolveMediaUrl = (url?: string | null): string => {
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
-  const backendDomain = import.meta.env.VITE_API_BASE_URL || "http://localhost:1234";
+  const rawApiUrl =
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://localhost:1234/apis/v1";
+  const backendDomain = rawApiUrl
+    .replace(/\/apis?\/v\d+\/?$/i, "")
+    .replace(/\/$/, "");
   const cleanUrl = url.startsWith("/") ? url : `/${url}`;
   return `${backendDomain}${cleanUrl}`;
 };
 
-export const resolveProductImageUrl = resolveMediaUrl;
+export const DEFAULT_PRODUCT_IMAGE = "/mock_data.png";
+
+export const resolveProductImageUrl = (url?: string | null): string => {
+  return resolveMediaUrl(url) || DEFAULT_PRODUCT_IMAGE;
+};
 
 /**
  * Formats a size in bytes to a human-readable format (e.g., KB, MB).

@@ -6,6 +6,7 @@ import { FormInput } from "../../ui/FormFields";
 import { registerAPI } from "@/services/auth.service";
 import { registerSchema } from "@/validation/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { API_BASE_URL } from "@/config/axios";
 
 interface RegisterFormData {
   email: string;
@@ -23,6 +24,10 @@ export default function RegisterForm({
 }: RegisterFormProps) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/auth/google`;
+  };
 
   const methods = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -149,6 +154,25 @@ export default function RegisterForm({
           </button>
         </form>
       </FormProvider>
+
+      {/* Divider & Google Login */}
+      <div className="relative my-2 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-200/80" />
+        </div>
+        <span className="relative bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          Hoặc
+        </span>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        className="w-full flex items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition-all cursor-pointer select-none active:scale-[0.98]"
+      >
+        <img src="/google-icon-logo.svg" alt="Google" className="w-4 h-4 shrink-0" />
+        <span>Đăng ký / Đăng nhập với Google</span>
+      </button>
 
       {/* Switch link */}
       <div className="border-t border-slate-100 pt-2 text-center">

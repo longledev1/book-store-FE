@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Documents & temporary files
+*.docx
+extracted_doc.txt

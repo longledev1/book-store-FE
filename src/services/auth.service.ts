@@ -89,3 +89,17 @@ export const refreshTokenAPI = async () => {
   );
   return response.data;
 };
+
+// RESEND VERIFICATION API [POST] -- /auth/resend-verification
+
+export const resendVerificationAPI = async (email: string) => {
+  const response = await axiosInstance.post("/auth/resend-verification", { email });
+  return response.data;
+};
+
+// VERIFY EMAIL API [POST] -- /auth/verify-email
+
+export const verifyEmailAPI = async (token: string) => {
+  const response = await axiosInstance.post("/auth/verify-email", { token });
+  return response.data;
+};

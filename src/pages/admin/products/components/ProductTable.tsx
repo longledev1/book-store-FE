@@ -1,5 +1,5 @@
 import React from "react";
-import { Edit3, Trash2, BookOpen, Image as ImageIcon } from "lucide-react";
+import { Edit3, Trash2, Image as ImageIcon } from "lucide-react";
 import { formatPrice, resolveProductImageUrl } from "../../../../utils/format";
 import { type Product } from "../../../../services/product.service";
 import Pagination from "../../../../components/ui/Pagination";
@@ -97,17 +97,14 @@ export default function ProductTable({
                     {/* Image */}
                     <td className="px-6 py-3">
                       <div className="flex items-center justify-center">
-                        {imageSrc ? (
-                          <img
-                            src={imageSrc}
-                            alt={product.name}
-                            className="w-10 h-14 object-cover rounded-lg border border-slate-100 shadow-sm"
-                          />
-                        ) : (
-                          <div className="w-10 h-14 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-350">
-                            <BookOpen className="w-5.5 h-5.5" />
-                          </div>
-                        )}
+                        <img
+                          src={imageSrc || "/mock_data.png"}
+                          alt={product.name}
+                          className="w-10 h-14 object-cover rounded-lg border border-slate-100 shadow-sm"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/mock_data.png";
+                          }}
+                        />
                       </div>
                     </td>
 

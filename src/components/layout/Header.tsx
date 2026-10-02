@@ -1,52 +1,34 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   BookOpen,
-  Search,
-  Heart,
   ShoppingCart,
-  User,
   ChevronDown,
-  ChevronUp,
-  UserPlus,
-  LogIn,
-  Package,
-  BookMarked,
-  Sparkles,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
-import AISearchModal from "../client/AISearchModal";
+import AISearchModal from "../client/ai/AISearchModal";
 import AuthModal from "../client/auth/AuthModal";
 import { AnimatePresence } from "framer-motion";
 import { useUIStore } from "../../store/useUIStore";
 
-import {
-  parentCategories,
-  categoriesData,
-} from "../../constants/categoriesData";
+import TopBar from "./header/TopBar";
+import HeaderSearch from "./header/HeaderSearch";
+import UserDropdown from "./header/UserDropdown";
+import MegaMenu from "./header/MegaMenu";
+import NotificationDropdown from "./header/NotificationDropdown";
+import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { getProfileAPI } from "@/services/auth.service";
+import { useCartStore } from "@/stores/useCartStore";
+import { toast } from "@/stores/useToastStore";
 
 export default function Header() {
-  const user = useAuthStore((state) => state.user) as any;
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
   const location = useLocation();
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("technology");
   const { isAISearchOpen, setIsAISearchOpen } = useUIStore();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalView, setAuthModalView] = useState<"login" | "register">(
-    "login",
-  );
+  const { isOpen: isAuthModalOpen, view: authModalView, closeModal: closeAuthModal, openModal: openAuthModal } = useAuthModalStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const cartTotalCount = useCartStore((state) => state.getTotalCount());
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
@@ -60,26 +42,20 @@ export default function Header() {
     }, 150);
   };
 
-  // Find active parent category data
-  const activeCatData = categoriesData.find((c) => c.id === activeCategory);
-  const subcategories = activeCatData ? activeCatData.categories : [];
+  const handleOpenAuthModal = (view: "login" | "register") => {
+    openAuthModal(view);
+  };
 
   return (
     <>
       {/* 1. Top Announcement Bar */}
-      <div className="bg-neutral-dark relative z-50 w-full px-4 py-2.5 text-center text-xs font-normal tracking-wide text-white">
-        <span>Mới: Hỗ trợ đăng nhập bằng Passkeys. </span>
-        <Link
-          to="/auth/login"
-          className="ml-1 font-medium underline transition-colors hover:text-blue-300"
-        >
-          Thử ngay
-        </Link>
-      </div>
+      <TopBar />
+
       {/* 2. Main Header Navigation */}
       <header className="border-border-light sticky top-0 z-50 h-16 w-full border-b bg-white shadow-sm">
         <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-4 md:px-8">
-          {/* Column 1: Left Group (Logo & Nav Links) */}
+          
+          {/* Column 1: Left Group (Logo & Navigation Links) */}
           <div className="flex h-full shrink-0 items-center gap-8">
             {/* Logo */}
             <Link to="/" className="group flex shrink-0 items-center gap-2.5">
@@ -91,7 +67,7 @@ export default function Header() {
               </span>
             </Link>
 
-            {/* Nav Links */}
+            {/* Navigation Links */}
             <nav className="hidden items-center gap-6 md:flex">
               {/* Trang chủ */}
               <Link
@@ -123,10 +99,11 @@ export default function Header() {
                 >
                   <span>Danh mục</span>
                   <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${megaMenuOpen ? "text-primary rotate-180" : "text-slate-450"}`}
+                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                      megaMenuOpen ? "text-primary rotate-180" : "text-slate-450"
+                    }`}
                   />
                 </button>
-                {/* Active Indicator Underline */}
                 {(megaMenuOpen || location.pathname.startsWith("/books")) && (
                   <div className="bg-primary absolute right-0 -bottom-1 left-0 h-[2px] rounded-full" />
                 )}
@@ -149,235 +126,51 @@ export default function Header() {
             </nav>
           </div>
 
-          {/* Column 2: Middle (Rounded Search Bar & AI Search Button) */}
-          <div className="mx-6 hidden max-w-xl flex-grow items-center justify-center gap-3 md:flex">
-            <div className="relative w-full max-w-xs lg:max-w-sm">
-              <Search className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm sách..."
-                className="focus:border-primary/50 focus:ring-primary/10 text-neutral-dark w-full rounded-full border border-slate-200/60 bg-slate-50 py-1.5 pr-4 pl-10 text-xs font-medium placeholder-slate-400 transition-all hover:bg-slate-100/50 focus:bg-white focus:ring-4 focus:outline-none"
-              />
-            </div>
+          {/* Column 2: Middle (Search Bar & AI Search Button) */}
+          <HeaderSearch />
 
-            <button
-              onClick={() => setIsAISearchOpen(true)}
-              className="from-primary shadow-primary/20 hover:shadow-primary/30 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-gradient-to-r to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
-            >
-              <Sparkles className="h-3.5 w-3.5 animate-pulse text-white" />
-              <span>Tìm sách với AI</span>
-            </button>
-          </div>
-
-          {/* Column 3: Right Side (Actions & Dropdown) */}
+          {/* Column 3: Right Side (Notifications, Wishlist, Cart, Account Dropdown) */}
           <div className="flex h-full shrink-0 items-center gap-2 md:gap-3">
-            {/* Wishlist */}
-            <Link
-              to="/wishlist"
-              className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-rose-500"
-              title="Danh sách yêu thích"
-            >
-              <Heart className="h-5 w-5" />
-            </Link>
+            {/* Realtime Notification Bell */}
+            <NotificationDropdown />
 
             {/* Shopping Cart */}
-            <Link
-              to="/cart"
-              className="hover:text-primary rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-50"
+            <button
+              type="button"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  openAuthModal("login");
+                  toast.warning("Vui lòng đăng nhập để xem giỏ hàng!");
+                  return;
+                }
+                navigate("/cart");
+              }}
+              className="hover:text-primary relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
               title="Giỏ hàng"
             >
               <ShoppingCart className="h-5 w-5" />
-            </Link>
+              {cartTotalCount > 0 && (
+                <span className="bg-primary absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full border-2 border-white px-1 text-[10px] font-extrabold text-white shadow-sm">
+                  {cartTotalCount > 99 ? "99+" : cartTotalCount}
+                </span>
+              )}
+            </button>
+
             {/* Vertical Divider */}
             <div className="mx-1 hidden h-5 w-px bg-slate-200 sm:block" />
+
             {/* User Account / Profile Dropdown */}
-            {!isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      className="hover:text-primary flex items-center gap-1.5 rounded-full px-3 py-1.5 text-slate-500"
-                    />
-                  }
-                >
-                  <User className="h-4 w-4" />
-                  <span className="">Tài khoản</span>
-                  <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setAuthModalView("register");
-                      setIsAuthModalOpen(true);
-                    }}
-                    className="flex cursor-pointer items-center gap-2 p-2"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                    <span>Đăng ký</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setAuthModalView("login");
-                      setIsAuthModalOpen(true);
-                    }}
-                    className="flex cursor-pointer items-center gap-2 p-2"
-                  >
-                    <LogIn className="h-4 w-4" />
-                    <span>Đăng nhập</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      className="hover:text-primary flex cursor-pointer items-center gap-2 rounded-full px-2.5 py-1.5 text-slate-500 transition-all"
-                    />
-                  }
-                >
-                  {user?.detail?.avatarUrl ? (
-                    <img
-                      src={user.detail.avatarUrl}
-                      alt={user.detail.fullName || "User Avatar"}
-                      className="h-6 w-6 rounded-full border border-slate-100 object-cover shadow-xs"
-                    />
-                  ) : (
-                    <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-black select-none">
-                      {(user?.detail?.fullName || "U").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <span className="max-w-[100px] truncate text-xs font-bold text-slate-700">
-                    Hi, {user?.detail?.fullName || "User"}
-                  </span>
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    className="flex cursor-pointer items-center gap-2 p-2"
-                    render={<Link to="/profile" />}
-                  >
-                    <User className="h-4 w-4 text-slate-400" />
-                    <span>Thông tin tài khoản</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={() => logout()}
-                    className="flex cursor-pointer items-center gap-2 p-2 text-rose-500 focus:bg-rose-50/50"
-                  >
-                    <LogIn className="h-4 w-4 rotate-180" />
-                    <span>Đăng xuất</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            <UserDropdown onOpenAuthModal={handleOpenAuthModal} />
           </div>
         </div>
 
-        {/* 3. Mega Menu (Toggled on Hovering over "Danh mục") */}
+        {/* 3. Mega Menu Dropdown */}
         {megaMenuOpen && (
-          <div
-            className="animate-in fade-in slide-in-from-top-1 absolute top-16 right-0 left-0 z-45 flex h-[420px] w-full border-b border-slate-200 bg-white shadow-2xl duration-150"
+          <MegaMenu
+            onClose={() => setMegaMenuOpen(false)}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-          >
-            <div className="mx-auto flex h-full w-full max-w-[1440px] px-4 md:px-8">
-              {/* Left Panel: Category list */}
-              <div className="flex h-full w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-100 bg-slate-50/60 p-5 text-left">
-                <h4 className="px-3 pb-3 text-[11px] font-bold tracking-wider text-slate-400 uppercase select-none">
-                  Danh mục sản phẩm
-                </h4>
-                <div className="flex flex-col gap-1.5">
-                  {parentCategories.map((cat) => {
-                    const isCurrent = activeCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        onMouseEnter={() => setActiveCategory(cat.id)}
-                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-semibold transition-all ${
-                          isCurrent
-                            ? "text-primary border-slate-150 border bg-white shadow-sm"
-                            : "text-slate-650 border border-transparent hover:bg-slate-100/50 hover:text-slate-900"
-                        }`}
-                      >
-                        <span>{cat.name}</span>
-                        {isCurrent && (
-                          <div className="bg-primary h-1.5 w-1.5 rounded-full" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right Panel: Subcategories Detail */}
-              <div className="flex h-full flex-grow flex-col overflow-y-auto p-8 text-left">
-                {/* Header title */}
-                <div className="mb-6 flex shrink-0 items-center gap-2.5 border-b border-slate-100 pb-4">
-                  <div className="text-primary border-primary/5 flex h-7 w-7 items-center justify-center rounded-lg border bg-blue-50">
-                    <BookMarked className="h-4 w-4" />
-                  </div>
-                  <h3 className="text-base font-bold tracking-tight text-slate-800">
-                    {activeCatData?.name}
-                  </h3>
-                </div>
-
-                {subcategories.length > 0 ? (
-                  <div className="flex-grow">
-                    {/* Grid Columns */}
-                    <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
-                      {subcategories.map((subcat) => (
-                        <div key={subcat.id} className="space-y-3">
-                          <h5 className="border-b border-slate-100 pb-1.5 text-xs font-bold tracking-wider text-slate-800 uppercase">
-                            {subcat.name}
-                          </h5>
-                          <ul className="space-y-2.5">
-                            {subcat.books.map((book) => (
-                              <li key={book.id}>
-                                <Link
-                                  to={`/books/${book.id}`}
-                                  className="hover:text-primary block max-w-[200px] truncate text-xs font-medium text-slate-500 transition-colors hover:underline"
-                                  title={`${book.title} - ${book.author}`}
-                                  onClick={() => setMegaMenuOpen(false)}
-                                >
-                                  <span className="block truncate font-semibold text-slate-700">
-                                    {book.title}
-                                  </span>
-                                  <span className="mt-0.5 block truncate text-[10px] font-normal text-slate-400">
-                                    {book.author}
-                                  </span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                          <Link
-                            to={`/books?category=${subcat.id}`}
-                            className="text-primary inline-block pt-1 text-xs font-bold transition-colors hover:text-blue-700 hover:underline"
-                            onClick={() => setMegaMenuOpen(false)}
-                          >
-                            Xem tất cả
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  /* Placeholder when no subcategories are defined */
-                  <div className="flex flex-grow flex-col items-center justify-center gap-2.5 py-12 text-slate-400">
-                    <Package className="h-10 w-10 stroke-[1.5] opacity-30" />
-                    <span className="text-xs font-medium">
-                      Danh mục đang được cập nhật sản phẩm...
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          />
         )}
       </header>
 
@@ -391,7 +184,7 @@ export default function Header() {
       {/* Account Auth Modal (Login / Register / Forgot Password) */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={closeAuthModal}
         initialView={authModalView}
       />
     </>

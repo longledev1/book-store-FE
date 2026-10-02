@@ -1,12 +1,12 @@
 import React from "react";
-import HeroSection from "../../components/client/HeroSection";
-import AISearchSection from "../../components/client/AISearchSection";
-import CategoryGrid from "../../components/client/CategoryGrid";
-import FeaturedBooks from "../../components/client/FeaturedBooks";
-import PopularBooks from "../../components/client/PopularBooks";
-import AIFeatures from "../../components/client/AIFeatures";
-import FeaturedAuthors from "../../components/client/FeaturedAuthors";
-import BlogAndNewsletter from "../../components/client/BlogAndNewsletter";
+import HeroSection from "../../components/client/home/HeroSection";
+import AISearchSection from "../../components/client/ai/AISearchSection";
+import CategoryGrid from "../../components/client/home/CategoryGrid";
+import FeaturedBooks from "../../components/client/home/FeaturedBooks";
+import PopularBooks from "../../components/client/home/PopularBooks";
+import AIFeatures from "../../components/client/home/AIFeatures";
+import FeaturedAuthors from "../../components/client/home/FeaturedAuthors";
+import BlogAndNewsletter from "../../components/client/home/BlogAndNewsletter";
 
 export default function HomePage() {
   return (

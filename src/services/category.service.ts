@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/axios";
-import { ADMIN_API_URL } from "@/config/apiEndpoints";
+import { ADMIN_API_URL, CLIENT_API_URL } from "@/config/apiEndpoints";
 
 export interface Category {
   id: string;
@@ -11,6 +11,15 @@ export interface Category {
   status: string;
   parentId: string | null;
   parent?: Category | null;
+  children?: Category[];
+}
+
+export interface CategoryTreeItem {
+  id: string;
+  name: string;
+  slug: string;
+  parentId?: string | null;
+  children?: CategoryTreeItem[];
 }
 
 export interface CategoryApiResponse {
@@ -40,6 +49,14 @@ export interface UpdateCategoryPayload {
   status?: number;
   parentId?: string;
 }
+
+// PUBLIC GET CATEGORY TREE API [GET] -- /categories/tree
+export const getPublicCategoryTreeAPI = async () => {
+  const response = await axiosInstance.get<CategoryTreeItem[]>(
+    CLIENT_API_URL.CATEGORY_TREE,
+  );
+  return response.data;
+};
 
 // CREATE CATEGORY API [GET] -- /admin/categories
 

@@ -1,6 +1,6 @@
 import React from "react";
+import { Outlet } from "react-router-dom";
 import UserSidebar from "../components/client/profile/UserSidebar";
-import ProfileForm from "../components/client/profile/ProfileForm";
 
 export default function ProfilePage() {
   return (
@@ -11,7 +11,7 @@ export default function ProfilePage() {
 
       {/* Right Content Area */}
       <main className="flex-grow p-8 bg-slate-50 min-h-screen overflow-y-auto">
-        <ProfileForm />
+        <Outlet />
       </main>
 
     </div>

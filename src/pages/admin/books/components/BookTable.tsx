@@ -60,9 +60,12 @@ export default function BookTable({
                   <td className="px-6 py-3.5">
                     <div className="w-10 h-13 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 shadow-sm">
                       <img
-                        src={book.image}
+                        src={book.image || "/mock_data.png"}
                         alt={book.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "/mock_data.png";
+                        }}
                       />
                     </div>
                   </td>

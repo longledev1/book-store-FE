@@ -4,10 +4,10 @@ import { Autoplay } from "swiper/modules";
 import { ArrowRight, Sparkles, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { getAuthorsForClientAPI, type Author } from "../../services/author.service";
-import { resolveMediaUrl } from "../../utils/format";
-import { PLACEHOLDER_AVATAR } from "../../constants/placeholders";
-import AuthorAvatar from "../common/AuthorAvatar";
+import { getAuthorsForClientAPI, type Author } from "@/services/author.service";
+import { resolveMediaUrl } from "@/utils/format";
+import { PLACEHOLDER_AVATAR } from "@/constants/placeholders";
+import AuthorAvatar from "@/components/common/AuthorAvatar";
 
 // Swiper core styles
 import "swiper/css";

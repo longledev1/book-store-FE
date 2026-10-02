@@ -21,6 +21,7 @@ interface User {
   email: string;
   role: "CUSTOMER" | "ADMIN";
   createdAt: string;
+  isVerified?: boolean;
   detail: UserDetail | null;
 }
 
@@ -35,9 +36,11 @@ interface AuthState {
   setAccessToken: (accessToken: string) => void;
 }
 
+import { useNotificationStore } from "./useNotificationStore";
+
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       accessToken: null,
       isAuthenticated: false,
       user: null,
@@ -57,12 +60,19 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setUser: (user) => {
+        const currentUser = get().user;
+        if (currentUser && currentUser.id !== user.id) {
+          useNotificationStore.getState().clearNotifications();
+          useNotificationStore.getState().disconnectSocket();
+        }
         set({
           user,
         });
       },
 
       logout: () => {
+        useNotificationStore.getState().clearNotifications();
+        useNotificationStore.getState().disconnectSocket();
         set({
           accessToken: null,
           isAuthenticated: false,

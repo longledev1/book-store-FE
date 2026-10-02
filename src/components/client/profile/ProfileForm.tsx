@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { FormInput } from "../../ui/FormFields";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { Calendar } from "lucide-react";
+import { Calendar, Fingerprint, ShieldCheck } from "lucide-react";
 import { formatDate } from "@/lib/formatDate";
 import { updateProfileAPI } from "@/services/user.service";
 import { toast } from "../../../stores/useToastStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProfileSchema } from "../../../validation/user.validation";
+import { startRegistration } from "@simplewebauthn/browser";
+import { getWebAuthnRegisterOptionsAPI, verifyWebAuthnRegisterAPI } from "@/services/webauthn.service";
 
 interface ProfileFormData {
   fullName: string;
@@ -22,6 +24,25 @@ const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf37
 export default function ProfileForm() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const [isRegisteringPasskey, setIsRegisteringPasskey] = useState(false);
+
+  const handleRegisterPasskey = async () => {
+    setIsRegisteringPasskey(true);
+    try {
+      toast.info("Đang khởi tạo đăng ký Passkey / Sinh trắc học...");
+      const options = await getWebAuthnRegisterOptionsAPI();
+      const regResponse = await startRegistration(options);
+      const res = await verifyWebAuthnRegisterAPI(regResponse, options.challenge);
+      toast.success(res?.message || "Đăng ký Passkey / Vân tay thành công!");
+    } catch (err: any) {
+      console.error("Lỗi đăng ký Passkey:", err);
+      toast.error(
+        err?.response?.data?.message || err?.message || "Đăng ký Passkey thất bại hoặc bị hủy"
+      );
+    } finally {
+      setIsRegisteringPasskey(false);
+    }
+  };
 
   const methods = useForm<ProfileFormData>({
     resolver: zodResolver(updateProfileSchema),
@@ -175,6 +196,35 @@ export default function ProfileForm() {
                 label="Đường dẫn ảnh đại diện (Avatar URL)"
                 placeholder="https://example.com/avatar.jpg"
               />
+            </div>
+          </div>
+
+          {/* Passkey & Sinh trắc học Section */}
+          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/50 p-4 sm:p-5 text-left space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                  <Fingerprint className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide">
+                    Bảo mật sinh trắc học & Passkey
+                  </h4>
+                  <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
+                    Đăng ký Vân tay, Touch ID / Face ID hoặc Windows Hello để đăng nhập nhanh không cần mật khẩu.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRegisterPasskey}
+                disabled={isRegisteringPasskey}
+                className="flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-black px-4 py-2 text-xs font-bold text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                <Fingerprint className="h-4 w-4 text-emerald-400" />
+                <span>{isRegisteringPasskey ? "Đang xử lý..." : "Thêm thiết bị Passkey"}</span>
+              </button>
             </div>
           </div>
 

@@ -21,7 +21,29 @@ export const CLIENT_API_URL = {
 
   AUTHOR_BY_ID: (id: string) => `/authors/id/${id}`,
 
+  CATEGORIES: "/categories",
+
+  CATEGORY_TREE: "/categories/tree",
+
   PRODUCTS: "/products",
+
+  PRODUCT_SEARCH: "/products/search",
+
+  PRODUCT_SEARCH_A: "/products/search-a",
+
+  PRODUCT_SEARCH_B: "/products/search-b",
+
+  PRODUCT_BY_SLUG: (slug: string) => `/products/${slug}`,
+
+  PRODUCT_BY_ID: (id: string) => `/products/id/${id}`,
+
+  ORDERS: "/orders",
+
+  MY_ORDERS: "/orders/my-orders",
+
+  ORDER_BY_ID: (id: string) => `/orders/${id}`,
+
+  CANCEL_ORDER: (id: string) => `/orders/my-orders/${id}/cancel`,
 };
 
 // 2. Các endpoint API dành cho trang Admin (Quản trị viên)
@@ -97,4 +119,19 @@ export const ADMIN_API_URL = {
   DELETE_MEDIA: (id: string) => `/admin/medias/${id}`,
 
   HARD_DELETE_MEDIA: (id: string) => `/admin/medias/hard/${id}`,
+
+  // Thống kê & Báo cáo (Analytics)
+  ANALYTICS_OVERVIEW: "/admin/analytics/overview",
+
+  ANALYTICS_REVENUE: "/admin/analytics/revenue",
+
+  ANALYTICS_ORDER_STATUS: "/admin/analytics/order-status",
+
+  ANALYTICS_PAYMENT_METHODS: "/admin/analytics/payment-methods",
+
+  ANALYTICS_TOP_SELLING: "/admin/analytics/top-selling-books",
+
+  ANALYTICS_CATEGORY_SALES: "/admin/analytics/category-sales",
+
+  ANALYTICS_CUSTOMER_GROWTH: "/admin/analytics/customer-growth",
 };

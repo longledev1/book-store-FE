@@ -13,21 +13,25 @@ import BooksPage from "../pages/client/BooksPage";
 import BookDetailPage from "../pages/client/BookDetailPage";
 import CartPage from "../pages/client/CartPage";
 import CheckoutPage from "../pages/client/CheckoutPage";
+import CheckoutSuccessPage from "../pages/client/CheckoutSuccessPage";
 import BlogPage from "../pages/client/BlogPage";
 import BlogDetailPage from "../pages/client/BlogDetailPage";
 import ProfilePage from "../pages/ProfilePage";
+import ProfileForm from "../components/client/profile/ProfileForm";
+import MyOrdersPage from "../pages/client/profile/MyOrdersPage";
+import ChangePasswordPage from "../pages/client/profile/ChangePasswordPage";
 import AuthorDetailPage from "../pages/client/AuthorDetailPage";
 
 // Auth Pages
-import LoginPage from "../pages/auth/LoginPage";
-import RegisterPage from "../pages/auth/RegisterPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
+import AuthSuccessPage from "../pages/auth/AuthSuccessPage";
+import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
 
 // Admin Pages
-import DashboardPage from "../pages/admin/DashboardPage";
+import DashboardPageManagement from "../pages/admin/dashboard/DashboardPageManagement";
 import ProductManagementPage from "../pages/admin/products/ProductManagementPage";
 import CategoryManagementPage from "../pages/admin/categories/CategoryManagementPage";
-import OrderManagementPage from "../pages/admin/OrderManagementPage";
+import OrderManagementPage from "../pages/admin/orders/OrderManagementPage";
 import UserManagementPage from "../pages/admin/UserManagementPage";
 import BlogManagementPage from "../pages/admin/BlogManagementPage";
 import AuthorManagementPage from "../pages/admin/authors/AuthorManagementPage";
@@ -60,6 +64,18 @@ const router = createBrowserRouter([
         element: <CheckoutPage />,
       },
       {
+        path: "checkout/success",
+        element: <CheckoutSuccessPage />,
+      },
+      {
+        path: "order/payment-result",
+        element: <CheckoutSuccessPage />,
+      },
+      {
+        path: "auth/success",
+        element: <AuthSuccessPage />,
+      },
+      {
         path: "blog",
         element: <BlogPage />,
       },
@@ -80,8 +96,25 @@ const router = createBrowserRouter([
     element: <ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]} />,
     children: [
       {
-        index: true,
         element: <ProfilePage />,
+        children: [
+          {
+            index: true,
+            element: <ProfileForm />,
+          },
+          {
+            path: "orders",
+            element: <MyOrdersPage />,
+          },
+          {
+            path: "purchase-history",
+            element: <MyOrdersPage />,
+          },
+          {
+            path: "change-password",
+            element: <ChangePasswordPage />,
+          },
+        ],
       },
     ],
   },
@@ -92,16 +125,16 @@ const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       {
-        path: "login",
-        element: <LoginPage />,
-      },
-      {
-        path: "register",
-        element: <RegisterPage />,
-      },
-      {
         path: "reset-password/:token",
         element: <ResetPasswordPage />,
+      },
+      {
+        path: "verify/:token",
+        element: <VerifyEmailPage />,
+      },
+      {
+        path: "verify-email/:token",
+        element: <VerifyEmailPage />,
       },
     ],
   },
@@ -117,7 +150,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <DashboardPage />,
+            element: <DashboardPageManagement />,
           },
           {
             path: "products",

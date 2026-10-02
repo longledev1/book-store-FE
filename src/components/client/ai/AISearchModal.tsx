@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Search, CornerDownLeft, Database, Loader2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { searchProductsAPI } from "@/services/product.service";
+import { resolveMediaUrl } from "@/utils/format";
 
 interface AISearchModalProps {
   onClose: () => void;
@@ -18,93 +20,10 @@ interface BookResult {
 }
 
 const searchSuggestions = [
-  "Sách khoa học viễn tưởng về tương lai trí tuệ nhân tạo",
-  "Sách dạy kinh doanh khởi nghiệp tinh gọn và tài chính",
-  "Lược sử loài người và các học thuyết triết học cổ đại"
+  "Lập trình",
+  "Marketing 5.0",
+  "Kinh doanh"
 ];
-
-const mockResults: Record<string, BookResult[]> = {
-  scifi: [
-    {
-      id: "1",
-      title: "Kỷ Nguyên Trí Tuệ Nhân Tạo",
-      author: "Max Tegmark",
-      category: "Khoa Học & Công Nghệ",
-      matchScore: 98.4,
-      description: "Cuốn sách khám phá tương lai của nhân loại trong kỷ nguyên AI, đưa ra các kịch bản từ siêu trí tuệ thống trị đến sự cộng sinh hoàn hảo giữa con người và máy móc.",
-      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=120"
-    },
-    {
-      id: "2",
-      title: "Vũ Trụ Trong Vỏ Hạt Dẻ",
-      author: "Stephen Hawking",
-      category: "Khoa Học & Công Nghệ",
-      matchScore: 89.7,
-      description: "Khám phá các bí ẩn sâu thẳm của vật lý lý thuyết, từ cơ học lượng tử, thuyết tương đối rộng đến lý thuyết siêu dây và vũ trụ học hiện đại.",
-      image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=120"
-    }
-  ],
-  finance: [
-    {
-      id: "3",
-      title: "Khởi Nghiệp Tinh Gọn",
-      author: "Eric Ries",
-      category: "Kinh Tế & Khởi Nghiệp",
-      matchScore: 97.2,
-      description: "Phương pháp khởi nghiệp đột phá giúp các doanh nghiệp tối ưu hóa nguồn lực, thử nghiệm nhanh chóng để thích ứng với thị trường thay đổi liên tục.",
-      image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=120"
-    },
-    {
-      id: "4",
-      title: "Đầu Tư Chứng Khoán Như Triệu Phú",
-      author: "William J. O'Neil",
-      category: "Kinh Tế & Khởi Nghiệp",
-      matchScore: 91.5,
-      description: "Hướng dẫn thực tế về phương pháp CANSLIM nổi tiếng để tìm kiếm các cổ phiếu tăng trưởng đột phá trên thị trường tài chính toàn cầu.",
-      image: "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?auto=format&fit=crop&q=80&w=120"
-    }
-  ],
-  history: [
-    {
-      id: "5",
-      title: "Sapiens: Lược Sử Loài Người",
-      author: "Yuval Noah Harari",
-      category: "Lịch Sử & Triết Học",
-      matchScore: 99.1,
-      description: "Tác phẩm vĩ đại tóm tắt toàn bộ lịch sử tiến hóa của loài người từ thời tiền sử đến thế kỷ 21, đặt ra những câu hỏi triết học sâu sắc về tương lai nhân loại.",
-      image: "https://images.unsplash.com/photo-1460518451285-cd3ab43ec357?auto=format&fit=crop&q=80&w=120"
-    },
-    {
-      id: "6",
-      title: "Lược Sử Thời Gian",
-      author: "Stephen Hawking",
-      category: "Lịch Sử & Triết Học",
-      matchScore: 89.2,
-      description: "Tác phẩm khoa học đại chúng kinh điển giải thích về nguồn gốc vũ trụ, không gian, thời gian và hố đen vũ trụ một cách vô cùng dễ hiểu.",
-      image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=120"
-    }
-  ],
-  default: [
-    {
-      id: "1",
-      title: "Kỷ Nguyên Trí Tuệ Nhân Tạo",
-      author: "Max Tegmark",
-      category: "Khoa Học & Công Nghệ",
-      matchScore: 95.8,
-      description: "Tương lai của nhân loại trong kỷ nguyên AI dưới góc nhìn của giáo sư vật lý MIT.",
-      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=120"
-    },
-    {
-      id: "5",
-      title: "Sapiens: Lược Sử Loài Người",
-      author: "Yuval Noah Harari",
-      category: "Lịch Sử & Triết Học",
-      matchScore: 94.2,
-      description: "Khám phá lịch sử tiến hóa nhân loại qua lăng kính khoa học và xã hội học.",
-      image: "https://images.unsplash.com/photo-1460518451285-cd3ab43ec357?auto=format&fit=crop&q=80&w=120"
-    }
-  ]
-};
 
 export default function AISearchModal({ onClose }: AISearchModalProps) {
   const [query, setQuery] = useState("");
@@ -129,41 +48,74 @@ export default function AISearchModal({ onClose }: AISearchModalProps) {
     }
   };
 
-  const handleSearch = (searchQuery: string) => {
+  const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
     setQuery(searchQuery);
     setSearching(true);
     setResults(null);
     setSearchStep(1);
 
-    // Step 1: Connecting pgvector
-    setTimeout(() => {
+    try {
       setSearchStep(2);
-      // Step 2: Querying Text Embeddings
+      const res: any = await searchProductsAPI(searchQuery.trim(), 10);
+      setSearchStep(3);
+
+      const rawData: any[] = res?.data?.results || (Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []);
+
+      // Lấy max score để làm mốc lọc nhiễu tương quan (Relative Threshold)
+      const rawScores = rawData.map((item: any) => parseFloat(item.searchScore || "0"));
+      const maxScore = Math.max(0, ...rawScores);
+
+      const mappedResults: BookResult[] = [];
+
+      rawData.forEach((item: any, idx: number) => {
+        const numericScore = rawScores[idx];
+
+        // Lọc bỏ kết quả bị nhiễu (điểm quá thấp hoặc < 58% so với kết quả hàng đầu)
+        if (maxScore > 0) {
+          const ratio = numericScore / maxScore;
+          if (numericScore < 0.30 || ratio < 0.58) {
+            return;
+          }
+        }
+
+        const firstAlbum = item.albums?.[0];
+        const rawUrl =
+          firstAlbum?.url ||
+          (firstAlbum as any)?.imageUrl ||
+          firstAlbum?.media?.fileUrl ||
+          firstAlbum?.media?.url ||
+          item.imgUrl;
+
+        const coverImg = resolveMediaUrl(rawUrl) || "/mock_data.png";
+
+        const categoryName = item.categories?.[0]?.name || item.category || "Sách";
+        const authorName = item.bookDetail?.author || item.authors?.[0]?.name || item.author || "Nhiều tác giả";
+
+        const ratio = maxScore > 0 ? numericScore / maxScore : 1;
+        const matchScore = Math.min(99, Math.max(70, Math.round(96 * ratio)));
+
+        mappedResults.push({
+          id: item.slug || item.id,
+          title: item.name || item.title || "Sách",
+          author: authorName,
+          category: categoryName,
+          matchScore,
+          description: item.shortDescribe || item.describe || item.description || "Tác phẩm được gợi ý phù hợp nhất từ AI Engine.",
+          image: coverImg,
+        });
+      });
+
+      setSearchStep(4);
       setTimeout(() => {
-        setSearchStep(3);
-        // Step 3: Cosine Similarity Calculation
-        setTimeout(() => {
-          setSearchStep(4);
-          // Step 4: Formatting results
-          setTimeout(() => {
-            // Determine result group based on keywords
-            const lowerQuery = searchQuery.toLowerCase();
-            let selectedResults = mockResults.default;
-            if (lowerQuery.includes("viễn tưởng") || lowerQuery.includes("ai") || lowerQuery.includes("robot") || lowerQuery.includes("công nghệ")) {
-              selectedResults = mockResults.scifi;
-            } else if (lowerQuery.includes("tài chính") || lowerQuery.includes("kinh tế") || lowerQuery.includes("khởi nghiệp") || lowerQuery.includes("tiền")) {
-              selectedResults = mockResults.finance;
-            } else if (lowerQuery.includes("lịch sử") || lowerQuery.includes("triết học") || lowerQuery.includes("loài người")) {
-              selectedResults = mockResults.history;
-            }
-            
-            setResults(selectedResults);
-            setSearching(false);
-          }, 300);
-        }, 500);
-      }, 500);
-    }, 400);
+        setResults(mappedResults);
+        setSearching(false);
+      }, 250);
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm AI search-b:", error);
+      setResults([]);
+      setSearching(false);
+    }
   };
 
   const getStepText = () => {
@@ -289,13 +241,15 @@ export default function AISearchModal({ onClose }: AISearchModalProps) {
               
               <div className="space-y-3.5">
                 {results.map((book) => (
-                  <div 
+                  <Link 
                     key={book.id} 
-                    className="p-4 bg-white border border-slate-150 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex gap-4 relative group"
+                    to={`/books/${book.id}`}
+                    onClick={onClose}
+                    className="p-4 bg-white border border-slate-150 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex gap-4 relative group cursor-pointer block text-left"
                   >
                     {/* Cover image */}
                     <div className="w-16 h-20 bg-slate-50 border border-slate-100 rounded-lg overflow-hidden shrink-0">
-                      <img src={book.image} alt={book.title} className="w-full h-full object-cover" />
+                      <img src={book.image} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
 
                     {/* Book Details */}
@@ -321,17 +275,13 @@ export default function AISearchModal({ onClose }: AISearchModalProps) {
                         <span>{book.matchScore}% Match</span>
                       </span>
                       
-                      <Link 
-                        to={`/books/${book.id}`}
-                        onClick={onClose}
-                        className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 mt-6"
-                      >
+                      <span className="text-xs font-bold text-primary group-hover:underline flex items-center gap-0.5 mt-6">
                         <span>Xem sách</span>
                         <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
+                      </span>
                     </div>
 
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

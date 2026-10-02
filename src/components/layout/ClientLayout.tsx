@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import Header from "./Header";
+import UnverifiedAccountModal from "../client/auth/UnverifiedAccountModal";
 
 export default function ClientLayout() {
   const { pathname } = useLocation();
@@ -19,6 +20,9 @@ export default function ClientLayout() {
       <main className="flex-grow">
         <Outlet />
       </main>
+
+      {/* Global Unverified Account Modal */}
+      <UnverifiedAccountModal />
 
       {/* Spaced & Rich 4-Column Footer */}
       <footer className="bg-[#0B0F19] text-slate-400 pt-16 pb-12 border-t border-slate-900 mt-16 md:mt-24 relative overflow-hidden font-sans">
@@ -69,7 +73,13 @@ export default function ClientLayout() {
                   <Link to="/cart" className="hover:text-primary transition-colors text-slate-400">Giỏ hàng của tôi</Link>
                 </li>
                 <li>
-                  <Link to="/auth/login" className="hover:text-primary transition-colors text-slate-400">Đăng ký & Đăng nhập</Link>
+                  <button
+                    type="button"
+                    onClick={() => useAuthModalStore.getState().openModal("login")}
+                    className="hover:text-primary transition-colors text-slate-400 cursor-pointer"
+                  >
+                    Đăng ký & Đăng nhập
+                  </button>
                 </li>
               </ul>
             </div>

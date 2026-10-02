@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { ArrowLeft, BookOpen, ChevronDown } from "lucide-react";
 
 import { adminMenuConfig } from "../../config/adminNavigation";
+import NotificationDropdown from "./header/NotificationDropdown";
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -148,7 +149,8 @@ export default function AdminLayout() {
       <div className="flex-grow flex flex-col min-h-screen overflow-y-auto">
         <header className="h-16 border-b border-border-light bg-white flex items-center justify-between px-8 shrink-0">
           <span className="text-sm font-bold text-slate-800">Hệ thống quản trị LuminaBook.ai</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <NotificationDropdown />
             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-750 text-xs">
               AD
             </div>

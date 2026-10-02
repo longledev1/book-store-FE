@@ -1,17 +1,19 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
-import SectionBadge from "./SectionBadge";
-import BookCard from "./BookCard";
+import SectionBadge from "@/components/common/SectionBadge";
+import BookCard from "@/components/client/books/BookCard";
 
 // Swiper core styles
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import { mockBooks } from "../../constants/booksData";
+import { getProductsForClientAPI, type Product } from "@/services/product.service";
+import { resolveMediaUrl, formatPrice } from "@/utils/format";
+import { PLACEHOLDER_BOOK_IMAGE } from "@/constants/placeholders";
 
 const chunkArray = <T,>(arr: T[], size: number): T[][] => {
   const chunks: T[][] = [];
@@ -23,10 +25,42 @@ const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 
 export default function FeaturedBooks() {
   const [activeFilter, setActiveFilter] = useState<"all" | "newest" | "ai">("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
 
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFeaturedProducts = async () => {
+      setIsLoading(true);
+      try {
+        let orderBy = "createdAt";
+        let sort = "DESC";
+
+        if (activeFilter === "ai") {
+          orderBy = "soldCount";
+          sort = "DESC";
+        }
+
+        const res = await getProductsForClientAPI(1, 20, undefined, undefined, undefined, orderBy, sort);
+        if (isMounted && res && res.data) {
+          setProducts(res.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách sách tiêu biểu:", error);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeFilter]);
 
   const toggleWishlist = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,18 +68,7 @@ export default function FeaturedBooks() {
     setWishlist((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const getFilteredBooks = () => {
-    let list = [...mockBooks];
-    if (activeFilter === "newest") {
-      list = list.filter((b) => b.isNew);
-    } else if (activeFilter === "ai") {
-      list = list.sort((a, b) => b.aiScore - a.aiScore);
-    }
-    return list;
-  };
-
-  const filteredBooks = getFilteredBooks();
-  const bookPairs = chunkArray(filteredBooks, 2);
+  const bookPairs = chunkArray(products, 2);
 
   return (
     <section className="py-16 md:py-24 bg-white border-b border-border-light font-sans overflow-hidden">
@@ -58,7 +81,7 @@ export default function FeaturedBooks() {
             {activeFilter === "ai" && (
               <div className="flex items-center gap-1.5 text-xs text-primary font-bold">
                 <Sparkles className="w-4 h-4 animate-pulse text-primary" />
-                <span>AI xếp hạng đặc biệt dựa trên sở thích của bạn</span>
+                <span>AI xếp hạng đặc biệt dựa trên sở thích và xu hướng chọn lựa</span>
               </div>
             )}
           </div>
@@ -122,7 +145,12 @@ export default function FeaturedBooks() {
 
         {/* Swiper Slider Wrapper */}
         <div className="relative pt-2">
-          {filteredBooks.length === 0 ? (
+          {isLoading ? (
+            <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-400 text-sm font-medium border border-dashed border-slate-200 rounded-3xl">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span>Đang tải danh sách sách...</span>
+            </div>
+          ) : products.length === 0 ? (
             <div className="py-16 text-center text-slate-400 text-sm font-medium border border-dashed border-slate-200 rounded-3xl">
               Không tìm thấy sách phù hợp ở bộ lọc này.
             </div>
@@ -153,23 +181,36 @@ export default function FeaturedBooks() {
               {bookPairs.map((pair, pairIndex) => (
                 <SwiperSlide key={pairIndex}>
                   <div className="flex flex-col gap-6">
-                    {pair.map((book) => (
-                      <BookCard
-                        key={book.id}
-                        id={book.id}
-                        title={book.title}
-                        author={book.author}
-                        category={book.category}
-                        price={book.price}
-                        rating={book.rating}
-                        image={book.image}
-                        isNew={book.isNew}
-                        aiScore={book.aiScore}
-                        showAiScore={activeFilter === "ai"}
-                        isFavorited={!!wishlist[book.id]}
-                        onToggleFavorite={toggleWishlist}
-                      />
-                    ))}
+                    {pair.map((book) => {
+                      const firstAlbum = book.albums?.[0];
+                      const coverUrl = (firstAlbum as any)?.imageUrl
+                        ? resolveMediaUrl((firstAlbum as any).imageUrl)
+                        : firstAlbum?.media?.fileUrl
+                        ? resolveMediaUrl(firstAlbum.media.fileUrl)
+                        : book.imgUrl || PLACEHOLDER_BOOK_IMAGE;
+                      const authorName = (book as any).authors?.[0]?.name || "Nhiều tác giả";
+                      const categoryName = (book as any).categories?.[0]?.name || "Sách";
+                      const bookPrice = formatPrice(book.finalPrice || book.price || 0);
+
+                      return (
+                        <BookCard
+                          key={book.id}
+                          id={book.slug || book.id}
+                          title={book.name}
+                          author={authorName}
+                          category={categoryName}
+                          price={bookPrice}
+                          rating={(book as any).rating || 5.0}
+                          image={coverUrl}
+                          isNew={activeFilter === "newest"}
+                          aiScore={(book as any).aiScore || 98}
+                          showAiScore={activeFilter === "ai"}
+                          isFavorited={!!wishlist[book.id]}
+                          rawProduct={book}
+                          onToggleFavorite={toggleWishlist}
+                        />
+                      );
+                    })}
                   </div>
                 </SwiperSlide>
               ))}
@@ -181,3 +222,4 @@ export default function FeaturedBooks() {
     </section>
   );
 }
+

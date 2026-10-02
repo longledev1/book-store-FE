@@ -219,3 +219,36 @@ export const getProductsForClientAPI = async (
 
   return response.data;
 };
+
+// GET PRODUCT BY SLUG FOR CLIENT API [GET] -- /products/:slug
+export const getProductBySlugForClientAPI = async (slug: string) => {
+  const response = await axiosInstance.get(
+    CLIENT_API_URL.PRODUCT_BY_SLUG(slug),
+  );
+  return response.data;
+};
+
+// GET PRODUCT BY ID FOR CLIENT API [GET] -- /products/id/:id
+export const getProductByIdForClientAPI = async (id: string) => {
+  const response = await axiosInstance.get(CLIENT_API_URL.PRODUCT_BY_ID(id));
+  return response.data;
+};
+
+// SEARCH PRODUCTS OFFICIAL API (HYBRID SEARCH) [GET] -- /products/search?keyword=...&limit=...
+export const searchProductsAPI = async (keyword: string, limit = 10) => {
+  const response = await axiosInstance.get(CLIENT_API_URL.PRODUCT_SEARCH, {
+    params: { keyword, limit },
+  });
+  return response.data;
+};
+
+// SEARCH PRODUCTS B API [GET] -- Alias for backward compatibility
+export const searchProductsBAPI = searchProductsAPI;
+
+// SEARCH PRODUCTS A API [GET] -- /products/search-a?keyword=...&limit=...
+export const searchProductsAAPI = async (keyword: string, limit = 10) => {
+  const response = await axiosInstance.get(CLIENT_API_URL.PRODUCT_SEARCH_A, {
+    params: { keyword, limit },
+  });
+  return response.data;
+};

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Network, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { useUIStore } from "../../store/useUIStore";
+import { useUIStore } from "@/store/useUIStore";
 
 export default function HeroSection() {
   const { introFinished, setIsAISearchOpen } = useUIStore();

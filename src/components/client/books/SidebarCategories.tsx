@@ -1,17 +1,19 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
-import { categoriesData } from "../../../constants/categoriesData";
+import type { CategoryTreeItem } from "../../../services/category.service";
 
 interface SidebarCategoriesProps {
+  categories: CategoryTreeItem[];
   activeCategory: string;
   activeSubcategory: string;
   hoveredCategoryId: string | null;
   setHoveredCategoryId: (id: string | null) => void;
-  onParentSelect: (id: string) => void;
-  onSubcatSelect: (id: string, e: React.MouseEvent) => void;
+  onParentSelect: (slugOrId: string) => void;
+  onSubcatSelect: (parentSlugOrId: string, subcatSlugOrId: string, e: React.MouseEvent) => void;
 }
 
 export default function SidebarCategories({
+  categories,
   activeCategory,
   activeSubcategory,
   hoveredCategoryId,
@@ -26,10 +28,12 @@ export default function SidebarCategories({
       </h4>
       
       <nav className="flex flex-col gap-2">
-        {categoriesData.map((cat) => {
-          const isActive = activeCategory === cat.id;
-          const isHovered = hoveredCategoryId === cat.id;
+        {categories.map((cat) => {
+          const catKey = cat.slug || cat.id;
+          const isActive = activeCategory === cat.slug || activeCategory === cat.id;
+          const isHovered = hoveredCategoryId === cat.id || hoveredCategoryId === cat.slug;
           const isExpanded = isActive || isHovered;
+          const children = cat.children || [];
 
           return (
             <div
@@ -40,7 +44,7 @@ export default function SidebarCategories({
             >
               {/* Parent Category Button */}
               <button
-                onClick={() => onParentSelect(cat.id)}
+                onClick={() => onParentSelect(catKey)}
                 className={`group flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 text-left text-xs md:text-sm font-bold transition-all ${
                   isActive
                     ? "text-primary border-slate-200/60 border bg-slate-50/20 shadow-sm"
@@ -52,7 +56,7 @@ export default function SidebarCategories({
                   {isActive && (
                     <div className="bg-primary h-2 w-2 rounded-sm" />
                   )}
-                  {cat.categories.length > 0 && (
+                  {children.length > 0 && (
                     <ChevronDown
                       className={`h-4 w-4 text-slate-400 transition-transform duration-300 ${
                         isExpanded ? "rotate-180 text-primary" : ""
@@ -63,7 +67,7 @@ export default function SidebarCategories({
               </button>
 
               {/* Subcategories Level 2 Dropdown (Animated Accordion height) */}
-              {cat.categories.length > 0 && (
+              {children.length > 0 && (
                 <div
                   className={`transition-all duration-300 overflow-hidden ${
                     isExpanded ? "max-h-60 mt-1 pb-2 pl-4" : "max-h-0"
@@ -72,7 +76,7 @@ export default function SidebarCategories({
                   <div className="flex flex-col gap-1 border-l border-slate-100 pl-3 pt-1">
                     {/* Option to show all inside parent */}
                     <button
-                      onClick={() => onParentSelect(cat.id)}
+                      onClick={() => onParentSelect(catKey)}
                       className={`py-1.5 text-left text-xs font-semibold cursor-pointer transition-colors block ${
                         isActive && activeSubcategory === "all"
                           ? "text-primary font-bold"
@@ -83,19 +87,24 @@ export default function SidebarCategories({
                     </button>
                     
                     {/* Loop subcategories */}
-                    {cat.categories.map((subcat) => (
-                      <button
-                        key={subcat.id}
-                        onClick={(e) => onSubcatSelect(subcat.id, e)}
-                        className={`py-1.5 text-left text-xs font-semibold cursor-pointer transition-colors block ${
-                          activeSubcategory === subcat.id
-                            ? "text-primary font-bold"
-                            : "text-slate-450 hover:text-slate-800"
-                        }`}
-                      >
-                        {subcat.name}
-                      </button>
-                    ))}
+                    {children.map((subcat) => {
+                      const subcatKey = subcat.slug || subcat.id;
+                      const isSubcatActive = activeSubcategory === subcat.slug || activeSubcategory === subcat.id;
+
+                      return (
+                        <button
+                          key={subcat.id}
+                          onClick={(e) => onSubcatSelect(catKey, subcatKey, e)}
+                          className={`py-1.5 text-left text-xs font-semibold cursor-pointer transition-colors block ${
+                            isSubcatActive
+                              ? "text-primary font-bold"
+                              : "text-slate-450 hover:text-slate-800"
+                          }`}
+                        >
+                          {subcat.name}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

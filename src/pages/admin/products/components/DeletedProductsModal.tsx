@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, RotateCcw, Search, Trash2, BookOpen } from "lucide-react";
+import { X, RotateCcw, Search, Trash2 } from "lucide-react";
 import {
   getDeletedProductsAPI,
   restoreProductAPI,
@@ -182,17 +182,14 @@ export default function DeletedProductsModal({
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center">
-                            {imageSrc ? (
-                              <img
-                                src={imageSrc}
-                                alt={product.name}
-                                className="w-10 h-14 object-cover rounded-lg border border-slate-100 shadow-sm"
-                              />
-                            ) : (
-                              <div className="w-10 h-14 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-350">
-                                <BookOpen className="w-5.5 h-5.5" />
-                              </div>
-                            )}
+                            <img
+                              src={imageSrc || "/mock_data.png"}
+                              alt={product.name}
+                              className="w-10 h-14 object-cover rounded-lg border border-slate-100 shadow-sm"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/mock_data.png";
+                              }}
+                            />
                           </div>
                         </td>
                         <td className="px-4 py-3 text-slate-800 font-extrabold whitespace-nowrap">

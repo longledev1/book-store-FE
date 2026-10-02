@@ -13,8 +13,8 @@ import {
   type Product,
 } from "../../services/product.service";
 import { resolveMediaUrl, formatPrice } from "../../utils/format";
-import SectionBadge from "../../components/client/SectionBadge";
-import BookCard from "../../components/client/BookCard";
+import SectionBadge from "@/components/common/SectionBadge";
+import BookCard from "@/components/client/books/BookCard";
 import AuthorAvatar from "../../components/common/AuthorAvatar";
 
 export default function AuthorDetailPage() {
@@ -222,14 +222,14 @@ export default function AuthorDetailPage() {
                 {publishedBooks.map((product) => {
                   const coverImage = product.albums?.[0]?.media?.fileUrl
                     ? resolveMediaUrl(product.albums[0].media.fileUrl)
-                    : product.imgUrl || "";
+                    : product.imgUrl || "/mock_data.png";
 
                   const categoryName = product.categories?.[0]?.name || "Sách";
 
                   return (
                     <BookCard
                       key={product.id}
-                      id={product.id}
+                      id={product.slug || product.id}
                       title={product.name}
                       author={author.name}
                       category={categoryName}
@@ -237,6 +237,7 @@ export default function AuthorDetailPage() {
                       rating={5}
                       image={coverImage}
                       isNew={product.isVerified}
+                      rawProduct={product}
                     />
                   );
                 })}

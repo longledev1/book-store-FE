@@ -1,3 +1,5 @@
+export const PLACEHOLDER_BOOK_IMAGE = "/mock_data.png";
+
 /**
  * SVG Data URI placeholder for author avatars without an image ("ĐANG CẬP NHẬT").
  */
